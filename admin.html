@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Synchronized Employee Management</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9Q1JYF5dJGQ8G05+5L3s4v0u1z7rVSu2W4l0g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+        }
+
+        .nav-link {
+            border-radius: 0.375rem;
+            margin-bottom: 0.25rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* Use Bootstrap's fade/show classes; do not override display for tab-pane */
+        /* .tab-pane { display: none !important; }  Removed */
+        /* .tab-pane.active { display: block !important; } Removed */
+
+        .department-item,
+        .compensation-item,
+        .employee-item {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #ffffff;
+        }
+
+        .department-header,
+        .compensation-header,
+        .employee-header {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+            cursor: pointer;
+        }
+
+        .department-content,
+        .compensation-content,
+        .employee-content {
+            padding: 15px;
+        }
+
+        .btn-action {
+            margin-right: 5px;
+        }
+
+        .enhanced-text-btn {
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+        }
+
+        .enhanced-text-btn:hover {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .salary-badge {
+            font-size: 1.1em;
+            padding: 0.5rem 1rem;
+        }
+
+        .sync-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #28a745;
+        }
+
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        @media (max-width: 768px) {
+            .d-flex {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100% !important;
+                min-width: auto;
+                height: auto !important;
+            }
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
+            <i class="fas fa-users-cog me-2"></i>Admin Dashboard
+        </a>
+        <div class="ms-auto">
+            <!-- <button class="btn btn-outline-info btn-sm me-3 tech-btn">
+                    <i class="fas fa-user-plus me-1"></i>Add Employee
+                </button> -->
+            <button class="btn logout-btn" onclick="premiumLogout()">
+                <i class="fas fa-power-off me-1"></i>Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Layout -->
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div class="bg-dark text-white p-3 vh-100 sidebar">
+            <ul class="nav flex-column" role="tablist">
+                <li class="nav-item">
+                    <a href="#home" class="nav-link active text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="home" aria-selected="true">
+                        <i class="fas fa-tachometer-alt me-2"></i>Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#people" class="nav-link text-white" data-bs-toggle="tab" role="tab" aria-controls="people"
+                        aria-selected="false">
+                        <i class="fas fa-users me-2"></i>People
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#profile" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="profile" aria-selected="false">
+                        <i class="fas fa-id-card me-2"></i>Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#compensation" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="compensation" aria-selected="false">
+                        <i class="fas fa-dollar-sign me-2"></i>Compensation
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#emergency" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="emergency" aria-selected="false">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Emergency Contact
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#timeoff" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="timeoff" aria-selected="false">
+                        <i class="fas fa-calendar-alt me-2"></i>Time Off
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#performance" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="performance" aria-selected="false">
+                        <i class="fas fa-chart-line me-2"></i>Performance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#files" class="nav-link text-white" data-bs-toggle="tab" role="tab" aria-controls="files"
+                        aria-selected="false">
+                        <i class="fas fa-folder me-2"></i>Files
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#onboarding" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="onboarding" aria-selected="false">
+                        <i class="fas fa-user-plus me-2"></i>Onboarding
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#departments" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="departments" aria-selected="false">
+                        <i class="fas fa-building me-2"></i>Departments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#divisions" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="divisions" aria-selected="false">
+                        <i class="fas fa-sitemap me-2"></i>Divisions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#locations" class="nav-link text-white" data-bs-toggle="tab" role="tab"
+                        aria-controls="locations" aria-selected="false">
+                        <i class="fas fa-map-marker-alt me-2"></i>Locations
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Content Area -->
+        <div class="tab-content p-4 flex-grow-1 main-content">
+
+            <!-- Home Tab -->
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard Overview</h2>
+                    <button class="btn btn-sm btn-outline-primary" type="button" id="syncBtn">
+                        <i class="fas fa-sync me-1"></i>Sync Data
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Employees</h6>
+                                    <h3 class="mb-0" id="totalEmployees">0</h3>
+                                </div>
+                                <i class="fas fa-users fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Active Employees</h6>
+                                    <h3 class="mb-0" id="activeEmployees">0</h3>
+                                </div>
+                                <i class="fas fa-check-circle fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Departments</h6>
+                                    <h3 class="mb-0" id="totalDepartments">0</h3>
+                                </div>
+                                <i class="fas fa-building fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Payroll</h6>
+                                    <h3 class="mb-0" id="dashboardPayroll">$0</h3>
+                                </div>
+                                <i class="fas fa-dollar-sign fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-clock me-2"></i>Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity" class="text-center text-muted">
+                            <i class="fas fa-history fa-2x mb-2"></i>
+                            <p>Recent activities will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- People Tab -->
+            <div class="tab-pane fade" id="people" role="tabpanel" aria-labelledby="people-tab">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-users me-2"></i>People Management</h2>
+                    <button class="btn btn-outline-info btn-sm me-3 tech-btn" type="button" data-bs-toggle="modal"
+                        data-bs-target="#addEmployeeModal">
+                        <i class="fas fa-plus me-1"></i>Add Employee
+                    </button>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="searchEmployees"
+                                    placeholder="Search employees...">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterEmployeeDepartment">
+                                    <option value="">All Departments</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterEmployeeStatus">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="on-leave">On Leave</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary w-100" type="button"
+                                    id="filterEmployeesBtn">Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employees List -->
+                <div id="employeesList" class="mt-4"></div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <h2><i class="fas fa-id-card me-2"></i>Admin Profile</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <img src="https://via.placeholder.com/150" class="rounded-circle mb-3"
+                                    alt="Admin Avatar">
+                                <h4>Admin User</h4>
+                                <p class="text-muted">System Administrator</p>
+                            </div>
+                            <div class="col-md-8">
+                                <h5>Profile Information</h5>
+                                <hr>
+                                <p><strong>Name:</strong> System Administrator</p>
+                                <p><strong>Email:</strong> admin@company.com</p>
+                                <p><strong>Role:</strong> Super Admin</p>
+                                <p><strong>Last Login:</strong> <span id="lastLogin">Today</span></p>
+                                <p><strong>Permissions:</strong> Full Access</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compensation Tab -->
+            <div class="tab-pane fade" id="compensation" role="tabpanel" aria-labelledby="compensation-tab">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-dollar-sign me-2"></i>Employee Compensation Management</h2>
+                    <button class="btn btn-success" type="button" data-bs-toggle="modal"
+                        data-bs-target="#addCompensationModal">
+                        <i class="fas fa-plus me-1"></i>Add Compensation
+                    </button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Total Payroll</h6>
+                                    <h3 class="mb-0" id="totalPayroll">$0</h3>
+                                </div>
+                                <i class="fas fa-money-bill-wave fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Employees with Pay</h6>
+                                    <h3 class="mb-0" id="employeesWithPay">0</h3>
+                                </div>
+                                <i class="fas fa-user-check fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Avg Salary</h6>
+                                    <h3 class="mb-0" id="avgSalary">$0</h3>
+                                </div>
+                                <i class="fas fa-chart-bar fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body d-flex justify-content-between">
+                                <div>
+                                    <h6 class="card-title">Highest Paid</h6>
+                                    <h3 class="mb-0" id="highestPaid">$0</h3>
+                                </div>
+                                <i class="fas fa-trophy fa-2x align-self-center"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter and Search -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="searchCompensation"
+                                    placeholder="Search by employee name...">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterFrequency">
+                                    <option value="">All Frequencies</option>
+                                    <option value="hourly">Hourly</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filterCompDepartment">
+                                    <option value="">All Departments</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary w-100" type="button"
+                                    id="filterCompBtn">Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compensations List -->
+                <div id="compensationsList" class="mt-4"></div>
+            </div>
+
+            <!-- Emergency Contact Tab -->
+            <div class="tab-pane fade" id="emergency" role="tabpanel" aria-labelledby="emergency-tab">
+                <h2><i class="fas fa-exclamation-triangle me-2"></i>Emergency Contacts</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="emergencyContactsList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Off Tab -->
+            <div class="tab-pane fade" id="timeoff" role="tabpanel" aria-labelledby="timeoff-tab">
+                <h2><i class="fas fa-calendar-alt me-2"></i>Time Off Management</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="timeOffList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Tab -->
+            <div class="tab-pane fade" id="performance" role="tabpanel" aria-labelledby="performance-tab">
+                <h2><i class="fas fa-chart-line me-2"></i>Performance Reviews</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="performanceList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Files Tab -->
+            <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
+                <h2><i class="fas fa-folder me-2"></i>Employee Files</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="employeeFiles"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onboarding Tab -->
+            <div class="tab-pane fade" id="onboarding" role="tabpanel" aria-labelledby="onboarding-tab">
+                <h2><i class="fas fa-user-plus me-2"></i>Onboarding Management</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="onboardingList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Departments Tab -->
+            <div class="tab-pane fade" id="departments" role="tabpanel" aria-labelledby="departments-tab">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-building me-2"></i>Departments Management</h2>
+                    <button class="btn btn-success" type="button" data-bs-toggle="modal"
+                        data-bs-target="#addDepartmentModal">
+                        <i class="fas fa-plus me-1"></i>Add Department
+                    </button>
+                </div>
+                <div id="departmentsList" class="mt-4"></div>
+            </div>
+
+            <!-- Divisions Tab -->
+            <div class="tab-pane fade" id="divisions" role="tabpanel" aria-labelledby="divisions-tab">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-sitemap me-2"></i>Divisions</h2>
+                    <button class="btn btn-primary" type="button">
+                        <i class="fas fa-plus me-1"></i>Add Division
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">North America</h5>
+                                <p class="card-text" id="naEmployeeCount">Loading...</p>
+                                <button class="btn btn-sm btn-outline-primary" type="button">Manage</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Europe</h5>
+                                <p class="card-text" id="euEmployeeCount">Loading...</p>
+                                <button class="btn btn-sm btn-outline-primary" type="button">Manage</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Asia Pacific</h5>
+                                <p class="card-text" id="apEmployeeCount">Loading...</p>
+                                <button class="btn btn-sm btn-outline-primary" type="button">Manage</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Locations Tab -->
+            <div class="tab-pane fade" id="locations" role="tabpanel" aria-labelledby="locations-tab">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-map-marker-alt me-2"></i>Locations</h2>
+                    <button class="btn btn-primary" type="button">
+                        <i class="fas fa-plus me-1"></i>Add Location
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="locationsTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Location</th>
+                                        <th>Address</th>
+                                        <th>Employees</th>
+                                        <th>Manager</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="locationsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Add Employee Modal -->
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Employee</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEmployeeForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Personal Information</h6>
+                                <div class="mb-3">
+                                    <label for="empFirstName" class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" id="empFirstName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empLastName" class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" id="empLastName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empEmail" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="empEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empPhone" class="form-label">Phone *</label>
+                                    <input type="tel" class="form-control" id="empPhone" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empDateOfBirth" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" id="empDateOfBirth">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empAddress" class="form-label">Address</label>
+                                    <textarea class="form-control" id="empAddress" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Employment Information</h6>
+                                <div class="mb-3">
+                                    <label for="empId" class="form-label">Employee ID *</label>
+                                    <input type="text" class="form-control" id="empId" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empDepartment" class="form-label">Department *</label>
+                                    <select class="form-select" id="empDepartment" required>
+                                        <option value="">Select Department</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empPosition" class="form-label">Position *</label>
+                                    <input type="text" class="form-control" id="empPosition" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empManager" class="form-label">Manager</label>
+                                    <select class="form-select" id="empManager">
+                                        <option value="">Select Manager</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empHireDate" class="form-label">Hire Date *</label>
+                                    <input type="date" class="form-control" id="empHireDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empStatus" class="form-label">Status *</label>
+                                    <select class="form-select" id="empStatus" required>
+                                        <option value="">Select Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="on-leave">On Leave</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="empLocation" class="form-label">Location</label>
+                                    <input type="text" class="form-control" id="empLocation">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="mb-3">Emergency Contact</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="empEmergencyName" class="form-label">Emergency Contact
+                                                Name</label>
+                                            <input type="text" class="form-control" id="empEmergencyName">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="empEmergencyPhone" class="form-label">Emergency Contact
+                                                Phone</label>
+                                            <input type="tel" class="form-control" id="empEmergencyPhone">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="empEmergencyRelation" class="form-label">Relationship</label>
+                                            <input type="text" class="form-control" id="empEmergencyRelation">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="saveEmployeeBtn">Add Employee</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Department Modal -->
+    <div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Department</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDepartmentForm">
+                        <div class="mb-3">
+                            <label for="deptName" class="form-label">Department Name *</label>
+                            <input type="text" class="form-control" id="deptName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptHead" class="form-label">Department Head *</label>
+                            <select class="form-select" id="deptHead" required>
+                                <option value="">Select Employee</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptLocation" class="form-label">Location *</label>
+                            <input type="text" class="form-control" id="deptLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptBudget" class="form-label">Budget *</label>
+                            <input type="number" class="form-control" id="deptBudget" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="deptDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="saveDepartmentBtn">Add Department</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Compensation Modal -->
+    <div class="modal fade" id="addCompensationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Employee Compensation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCompensationForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="compEmployee" class="form-label">Select Employee *</label>
+                                    <select class="form-select" id="compEmployee" required>
+                                        <option value="">Select Employee</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="compEmployeeId" class="form-label">Employee ID</label>
+                                    <input type="text" class="form-control" id="compEmployeeId" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="compDepartment" class="form-label">Department</label>
+                                    <input type="text" class="form-control" id="compDepartment" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="compPosition" class="form-label">Position</label>
+                                    <input type="text" class="form-control" id="compPosition" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="compAmount" class="form-label">Compensation Amount *</label>
+                                    <input type="number" class="form-control" id="compAmount" step="0.01" min="0"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="compFrequency" class="form-label">Pay Frequency *</label>
+                                    <select class="form-select" id="compFrequency" required>
+                                        <option value="">Select Frequency</option>
+                                        <option value="hourly">Hourly</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="saveCompensationBtn">Add Compensation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navbar actions
+        document.getElementById("logoutBtn").addEventListener("click", premiumLogout);
+        document.getElementById("syncBtn").addEventListener("click", syncAllData);
+
+        // Filter buttons
+        document
+            .getElementById("filterEmployeesBtn")
+            .addEventListener("click", filterEmployees);
+        document
+            .getElementById("filterCompBtn")
+            .addEventListener("click", filterCompensations);
+
+        // Save buttons
+        document
+            .getElementById("saveEmployeeBtn")
+            .addEventListener("click", saveEmployee);
+        document
+            .getElementById("saveDepartmentBtn")
+            .addEventListener("click", saveDepartment);
+        document
+            .getElementById("saveCompensationBtn")
+            .addEventListener("click", saveCompensation);
+
+        // When employee selected in compensation modal, populate info
+        document
+            .getElementById("compEmployee")
+            .addEventListener("change", populateEmployeeInfo);
+
+        // Placeholder functions to avoid ReferenceError
+        function premiumLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.clear();     // nukes all origin keys
+                sessionStorage.clear();
+                localStorage.setItem("app:logoutFlag", String(Date.now()));
+                localStorage.removeItem("app:logoutFlag");
+                window.location.replace("login.html");
+            }
+        }
+
+        function syncAllData() {
+            // TODO: implement sync
+            console.log("Sync data");
+        }
+
+        function showAddEmployeeModal() {
+            const modal = new bootstrap.Modal(
+                document.getElementById("addEmployeeModal")
+            );
+            modal.show();
+        }
+
+        function showAddCompensationModal() {
+            const modal = new bootstrap.Modal(
+                document.getElementById("addCompensationModal")
+            );
+            modal.show();
+        }
+
+        function filterEmployees() {
+            // TODO: implement filtering logic
+            console.log("Filter employees");
+        }
+
+        function filterCompensations() {
+            // TODO: implement compensation filtering
+            console.log("Filter compensations");
+        }
+
+        function saveEmployee() {
+            // TODO: collect form data and persist
+            console.log("Save employee");
+            bootstrap.Modal.getInstance(
+                document.getElementById("addEmployeeModal")
+            )?.hide();
+        }
+
+        function saveDepartment() {
+            // TODO: collect department data and persist
+            console.log("Save department");
+            bootstrap.Modal.getInstance(
+                document.getElementById("addDepartmentModal")
+            )?.hide();
+        }
+
+        function populateEmployeeInfo() {
+            // TODO: set compEmployeeId, compDepartment, compPosition based on selected employee
+            console.log("Populate employee info for compensation");
+        }
+
+        function saveCompensation() {
+            // TODO: collect compensation form data and persist
+            console.log("Save compensation");
+            bootstrap.Modal.getInstance(
+                document.getElementById("addCompensationModal")
+            )?.hide();
+        }
+        /* ---------------- Storage helpers ---------------- */
+        const LS = {
+            get(key, fallback) {
+                try {
+                    const v = localStorage.getItem(key);
+                    return v ? JSON.parse(v) : fallback;
+                } catch {
+                    return fallback;
+                }
+            }, // [17][3]
+            set(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            }, // [17][3]
+            remove(key) {
+                localStorage.removeItem(key);
+            }, // [17][19]
+            onChange(handler) {
+                window.addEventListener("storage", (e) => handler(e)); // sync other tabs
+            }, // [7][17]
+        };
+
+        const NS = {
+            employees: "app:employees",
+            departments: "app:departments",
+            compensations: "app:compensations",
+            emergency: "app:emergency",
+            timeoff: "app:timeoff",
+            performance: "app:performance",
+            files: "app:files",
+            onboarding: "app:onboarding",
+            locations: "app:locations",
+            ui: "app:ui",
+        }; // [3][17]
+
+        /* ---------------- App state ---------------- */
+        let state = {
+            employees: [],
+            departments: [],
+            compensations: [],
+            emergency: [],
+            timeoff: [],
+            performance: [],
+            files: [],
+            onboarding: [],
+            locations: [],
+            ui: { activeTab: "#home", lastLogin: new Date().toISOString() },
+        }; // [3][11]
+
+        /* ---------------- Bootstrap tab persistence ---------------- */
+        // Save tab on change
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach((a) => {
+            a.addEventListener("shown.bs.tab", (e) => {
+                state.ui.activeTab = e.target.getAttribute("href");
+                LS.set(NS.ui, state.ui);
+            });
+        }); // [1][2]
+
+        function restoreActiveTab() {
+            const ui = LS.get(NS.ui, state.ui);
+            state.ui = { ...state.ui, ...ui };
+            const sel = `[data-bs-toggle="tab"][href="${state.ui.activeTab}"]`;
+            const link = document.querySelector(sel);
+            if (link) new bootstrap.Tab(link).show();
+        } // [1][2]
+
+        /* ---------------- Boot: load from localStorage ---------------- */
+        function boot() {
+            state.employees = LS.get(NS.employees, []);
+            state.departments = LS.get(NS.departments, []);
+            state.compensations = LS.get(NS.compensations, []);
+            state.emergency = LS.get(NS.emergency, []);
+            state.timeoff = LS.get(NS.timeoff, []);
+            state.performance = LS.get(NS.performance, []);
+            state.files = LS.get(NS.files, []);
+            state.onboarding = LS.get(NS.onboarding, []);
+            state.locations = LS.get(NS.locations, []);
+            state.ui = LS.get(NS.ui, state.ui);
+            renderAll();
+            restoreActiveTab();
+        } // [17][3]
+
+        /* ---------------- Renderers ---------------- */
+        function money(n) {
+            return new Intl.NumberFormat(undefined, {
+                style: "currency",
+                currency: "USD",
+            }).format(n || 0);
+        } // [11]
+
+        function calcPayrollStats() {
+            const amounts = state.compensations.map((c) => Number(c.amount) || 0);
+            const total = amounts.reduce((a, b) => a + b, 0);
+            const count = state.compensations.length;
+            const avg = count ? total / count : 0;
+            const max = amounts.length ? Math.max(...amounts) : 0;
+            return { total, count, avg, max };
+        } // [11]
+
+        function renderDashboard() {
+            const totalEmployees = state.employees.length;
+            const activeEmployees = state.employees.filter(
+                (e) => e.status === "active"
+            ).length;
+            const totalDepartments = state.departments.length;
+            const payroll = calcPayrollStats().total;
+            document.getElementById("totalEmployees").textContent = totalEmployees;
+            document.getElementById("activeEmployees").textContent = activeEmployees;
+            document.getElementById("totalDepartments").textContent = totalDepartments;
+            document.getElementById("dashboardPayroll").textContent = money(payroll);
+            document.getElementById("lastLogin").textContent = new Date(
+                state.ui.lastLogin
+            ).toLocaleString();
+        } // [11]
+
+        function ensureSelectOptions() {
+            // Dept filters/selects
+            const deptSelects = [
+                document.getElementById("empDepartment"),
+                document.getElementById("filterEmployeeDepartment"),
+                document.getElementById("filterCompDepartment"),
+            ].filter(Boolean);
+            deptSelects.forEach((sel) => {
+                const keepFirst = sel.id !== "empDepartment";
+                const current = sel.value;
+                sel.innerHTML = "";
+                if (keepFirst) sel.append(new Option("All Departments", ""));
+                else sel.append(new Option("Select Department", ""));
+                state.departments.forEach((d) => sel.append(new Option(d.name, d.name)));
+                if (current) sel.value = current;
+            });
+
+            // Manager list = employees
+            const mgr = document.getElementById("empManager");
+            if (mgr) {
+                const cur = mgr.value;
+                mgr.innerHTML = "";
+                mgr.append(new Option("Select Manager", ""));
+                state.employees.forEach((e) =>
+                    mgr.append(new Option(`${e.firstName} ${e.lastName}`, e.empId))
+                );
+                if (cur) mgr.value = cur;
+            }
+
+            // Compensation employee list
+            const compEmp = document.getElementById("compEmployee");
+            if (compEmp) {
+                const cur = compEmp.value;
+                compEmp.innerHTML = "";
+                compEmp.append(new Option("Select Employee", ""));
+                state.employees.forEach((e) =>
+                    compEmp.append(new Option(`${e.firstName} ${e.lastName}`, e.empId))
+                );
+                if (cur) compEmp.value = cur;
+            }
+        } // [11]
+
+        function renderEmployees() {
+            const q = (
+                document.getElementById("searchEmployees").value || ""
+            ).toLowerCase();
+            const dept = document.getElementById("filterEmployeeDepartment").value || "";
+            const status = document.getElementById("filterEmployeeStatus").value || "";
+            const list = document.getElementById("employeesList");
+
+            const filtered = state.employees.filter((e) => {
+                const name = `${e.firstName} ${e.lastName}`.toLowerCase();
+                const okQ =
+                    !q ||
+                    name.includes(q) ||
+                    (e.email || "").toLowerCase().includes(q) ||
+                    (e.empId || "").toLowerCase().includes(q);
+                const okD = !dept || e.department === dept;
+                const okS = !status || e.status === status;
+                return okQ && okD && okS;
+            }); // [11]
+
+            list.innerHTML =
+                filtered
+                    .map(
+                        (e) => `
+    <div class="employee-item">
+      <div class="employee-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <img class="employee-avatar me-2" src="https://via.placeholder.com/40" alt="">
+          <strong>${e.firstName} ${e.lastName}</strong> &middot; ${e.position
+                            } &middot; ${e.department}
+        </div>
+        <div>
+          <span class="badge bg-${e.status === "active"
+                                ? "success"
+                                : e.status === "on-leave"
+                                    ? "warning"
+                                    : "secondary"
+                            } text-uppercase">${e.status}</span>
+          <button class="btn btn-sm btn-outline-primary btn-action" onclick="editEmployee('${e.empId
+                            }')"><i class="fa fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteEmployee('${e.empId
+                            }')"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="employee-content">
+        <div>Email: ${e.email} &middot; Phone: ${e.phone} &middot; Hire: ${e.hireDate
+                            }</div>
+        <div>Manager: ${managerName(e.manager) || "—"} &middot; Location: ${e.location || "—"
+                            }</div>
+      </div>
+    </div>
+  `
+                    )
+                    .join("") || '<div class="text-muted">No employees found.</div>';
+        } // [11]
+
+        function managerName(empId) {
+            const m = state.employees.find((x) => x.empId === empId);
+            return m ? `${m.firstName} ${m.lastName}` : "";
+        } // [11]
+
+        function renderDepartments() {
+            const container = document.getElementById("departmentsList");
+            container.innerHTML =
+                state.departments
+                    .map(
+                        (d) => `
+    <div class="department-item">
+      <div class="department-header d-flex justify-content-between">
+        <strong>${d.name}</strong>
+        <div>
+          <span class="badge text-bg-secondary">${d.location}</span>
+          <span class="badge text-bg-info">${money(d.budget)}</span>
+          <button class="btn btn-sm btn-outline-primary btn-action" onclick="editDepartment('${d.id
+                            }')"><i class="fa fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteDepartment('${d.id
+                            }')"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="department-content">
+        <div>Head: ${employeeName(d.headEmpId) || "—"}</div>
+        <div class="text-muted">${d.description || ""}</div>
+      </div>
+    </div>
+  `
+                    )
+                    .join("") || '<div class="text-muted">No departments yet.</div>';
+        } // [11]
+
+        function employeeName(empId) {
+            const e = state.employees.find((x) => x.empId === empId);
+            return e ? `${e.firstName} ${e.lastName}` : "";
+        } // [11]
+
+        function renderCompensations() {
+            const q = (
+                document.getElementById("searchCompensation").value || ""
+            ).toLowerCase();
+            const freq = document.getElementById("filterFrequency").value || "";
+            const dept = document.getElementById("filterCompDepartment").value || "";
+            const container = document.getElementById("compensationsList");
+
+            const rows = state.compensations
+                .map((c) => ({
+                    ...c,
+                    emp: state.employees.find((e) => e.empId === c.empId),
+                }))
+                .filter((x) => {
+                    const okQ =
+                        !q ||
+                        (x.emp &&
+                            `${x.emp.firstName} ${x.emp.lastName}`.toLowerCase().includes(q));
+                    const okF = !freq || x.frequency === freq;
+                    const okD = !dept || (x.emp && x.emp.department === dept);
+                    return okQ && okF && okD;
+                }); // [11]
+
+            container.innerHTML =
+                rows
+                    .map(
+                        (x) => `
+    <div class="compensation-item">
+      <div class="compensation-header d-flex justify-content-between">
+        <div><strong>${x.emp ? `${x.emp.firstName} ${x.emp.lastName}` : x.empId
+                            }</strong> &middot; ${x.frequency.toUpperCase()}</div>
+        <div>
+          <span class="badge bg-success salary-badge">${money(x.amount)}</span>
+          <button class="btn btn-sm btn-outline-primary btn-action" onclick="editCompensation('${x.id
+                            }')"><i class="fa fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteCompensation('${x.id
+                            }')"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="compensation-content">
+        <div>Dept: ${x.emp ? x.emp.department : "—"} &middot; Position: ${x.emp ? x.emp.position : "—"
+                            }</div>
+      </div>
+    </div>
+  `
+                    )
+                    .join("") || '<div class="text-muted">No compensation records.</div>';
+
+            const stats = calcPayrollStats();
+            document.getElementById("totalPayroll").textContent = money(stats.total);
+            document.getElementById("employeesWithPay").textContent = stats.count;
+            document.getElementById("avgSalary").textContent = money(stats.avg);
+            document.getElementById("highestPaid").textContent = money(stats.max);
+        } // [11]
+
+        function renderLocations() {
+            const tbody = document.getElementById("locationsTableBody");
+            tbody.innerHTML =
+                state.locations
+                    .map(
+                        (l) => `
+    <tr>
+      <td>${l.name}</td>
+      <td>${l.address || "—"}</td>
+      <td>${l.employees || 0}</td>
+      <td>${employeeName(l.managerEmpId) || "—"}</td>
+      <td><span class="badge ${l.status === "active" ? "bg-success" : "bg-secondary"
+                            }">${l.status || "active"}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" onclick="editLocation('${l.id
+                            }')"><i class="fa fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteLocation('${l.id
+                            }')"><i class="fa fa-trash"></i></button>
+      </td>
+    </tr>
+  `
+                    )
+                    .join("") ||
+                '<tr><td colspan="6" class="text-muted">No locations.</td></tr>';
+        } // [11]
+
+        function renderAll() {
+            ensureSelectOptions();
+            renderDashboard();
+            renderEmployees();
+            renderDepartments();
+            renderCompensations();
+            renderLocations();
+        } // [11]
+
+        /* ---------------- CRUD wiring ---------------- */
+        // Employees
+        function saveEmployee() {
+            const e = {
+                empId: document.getElementById("empId").value.trim(),
+                firstName: document.getElementById("empFirstName").value.trim(),
+                lastName: document.getElementById("empLastName").value.trim(),
+                email: document.getElementById("empEmail").value.trim(),
+                phone: document.getElementById("empPhone").value.trim(),
+                dateOfBirth: document.getElementById("empDateOfBirth").value || "",
+                address: document.getElementById("empAddress").value || "",
+                department: document.getElementById("empDepartment").value || "",
+                position: document.getElementById("empPosition").value || "",
+                manager: document.getElementById("empManager").value || "",
+                hireDate: document.getElementById("empHireDate").value || "",
+                status: document.getElementById("empStatus").value || "active",
+                location: document.getElementById("empLocation").value || "",
+                emergency: {
+                    name: document.getElementById("empEmergencyName").value || "",
+                    phone: document.getElementById("empEmergencyPhone").value || "",
+                    relation: document.getElementById("empEmergencyRelation").value || "",
+                },
+            }; // [9][11]
+
+            const idx = state.employees.findIndex((x) => x.empId === e.empId);
+            if (idx >= 0) state.employees[idx] = e;
+            else state.employees.push(e);
+            LS.set(NS.employees, state.employees);
+            renderAll();
+            bootstrap.Modal.getInstance(
+                document.getElementById("addEmployeeModal")
+            )?.hide();
+        } // [9][11]
+
+        function editEmployee(empId) {
+            const e = state.employees.find((x) => x.empId === empId);
+            if (!e) return;
+            document.getElementById("empId").value = e.empId;
+            document.getElementById("empFirstName").value = e.firstName;
+            document.getElementById("empLastName").value = e.lastName;
+            document.getElementById("empEmail").value = e.email;
+            document.getElementById("empPhone").value = e.phone;
+            document.getElementById("empDateOfBirth").value = e.dateOfBirth || "";
+            document.getElementById("empAddress").value = e.address || "";
+            document.getElementById("empDepartment").value = e.department || "";
+            document.getElementById("empPosition").value = e.position || "";
+            document.getElementById("empManager").value = e.manager || "";
+            document.getElementById("empHireDate").value = e.hireDate || "";
+            document.getElementById("empStatus").value = e.status || "active";
+            document.getElementById("empLocation").value = e.location || "";
+            document.getElementById("empEmergencyName").value = e.emergency?.name || "";
+            document.getElementById("empEmergencyPhone").value = e.emergency?.phone || "";
+            document.getElementById("empEmergencyRelation").value =
+                e.emergency?.relation || "";
+            showAddEmployeeModal();
+        } // [9][11]
+
+        function deleteEmployee(empId) {
+            state.employees = state.employees.filter((x) => x.empId !== empId);
+            // also drop as manager references and comp records
+            state.compensations = state.compensations.filter((c) => c.empId !== empId);
+            state.departments = state.departments.map((d) =>
+                d.headEmpId === empId ? { ...d, headEmpId: "" } : d
+            );
+            LS.set(NS.employees, state.employees);
+            LS.set(NS.compensations, state.compensations);
+            LS.set(NS.departments, state.departments);
+            renderAll();
+        } // [11]
+
+        function filterEmployees() {
+            renderEmployees();
+        } // [11]
+
+        // Departments
+        function saveDepartment() {
+            const id = crypto.randomUUID();
+            const model = {
+                id,
+                name: document.getElementById("deptName").value.trim(),
+                headEmpId: document.getElementById("deptHead").value || "",
+                location: document.getElementById("deptLocation").value.trim(),
+                budget: Number(document.getElementById("deptBudget").value || 0),
+                description: document.getElementById("deptDescription").value || "",
+            }; // [6][11]
+
+            state.departments.push(model);
+            LS.set(NS.departments, state.departments);
+            renderAll();
+            bootstrap.Modal.getInstance(
+                document.getElementById("addDepartmentModal")
+            )?.hide();
+        } // [6][11]
+
+        function editDepartment(id) {
+            const d = state.departments.find((x) => x.id === id);
+            if (!d) return;
+            document.getElementById("deptName").value = d.name;
+            document.getElementById("deptHead").value = d.headEmpId || "";
+            document.getElementById("deptLocation").value = d.location;
+            document.getElementById("deptBudget").value = d.budget;
+            document.getElementById("deptDescription").value = d.description || "";
+            showAddDepartmentModal();
+        } // [6][11]
+
+        function showAddDepartmentModal() {
+            const modal = new bootstrap.Modal(
+                document.getElementById("addDepartmentModal")
+            );
+            modal.show();
+        } // [11]
+
+        function deleteDepartment(id) {
+            state.departments = state.departments.filter((x) => x.id !== id);
+            LS.set(NS.departments, state.departments);
+            renderAll();
+        } // [11]
+
+        // Compensation
+        function populateEmployeeInfo() {
+            const empId = document.getElementById("compEmployee").value;
+            const e = state.employees.find((x) => x.empId === empId);
+            document.getElementById("compEmployeeId").value = e?.empId || "";
+            document.getElementById("compDepartment").value = e?.department || "";
+            document.getElementById("compPosition").value = e?.position || "";
+        } // [11]
+
+        function saveCompensation() {
+            const id = crypto.randomUUID();
+            const model = {
+                id,
+                empId: document.getElementById("compEmployee").value,
+                amount: Number(document.getElementById("compAmount").value || 0),
+                frequency: document.getElementById("compFrequency").value,
+            }; // [6][11]
+
+            state.compensations.push(model);
+            LS.set(NS.compensations, state.compensations);
+            renderAll();
+            bootstrap.Modal.getInstance(
+                document.getElementById("addCompensationModal")
+            )?.hide();
+        } // [11]
+
+        function editCompensation(id) {
+            const c = state.compensations.find((x) => x.id === id);
+            if (!c) return;
+            document.getElementById("compEmployee").value = c.empId;
+            populateEmployeeInfo();
+            document.getElementById("compAmount").value = c.amount;
+            document.getElementById("compFrequency").value = c.frequency;
+            showAddCompensationModal();
+        } // [11]
+
+        function deleteCompensation(id) {
+            state.compensations = state.compensations.filter((x) => x.id !== id);
+            LS.set(NS.compensations, state.compensations);
+            renderAll();
+        } // [11]
+
+        function filterCompensations() {
+            renderCompensations();
+        } // [11]
+
+        // Locations (basic demo)
+        function editLocation(id) {
+            /* left as exercise */
+        } // [11]
+        function deleteLocation(id) {
+            state.locations = state.locations.filter((x) => x.id !== id);
+            LS.set(NS.locations, state.locations);
+            renderAll();
+        } // [11]
+
+        /* ---------------- Sync button & logout ---------------- */
+        function syncAllData() {
+            // In a real app, this would sync with server; here we just force re-render
+            renderAll();
+            console.log("Synced from localStorage");
+        } // [11]
+
+        function premiumLogout() {
+            // Keep data, but reset UI state
+            state.ui.lastLogin = new Date().toISOString();
+            LS.set(NS.ui, state.ui);
+            console.log("Logout clicked");
+        } // [11]
+
+        /* ---------------- Cross-tab live updates ---------------- */
+        LS.onChange((e) => {
+            if (!e.key || !e.newValue) return;
+            switch (e.key) {
+                case NS.employees:
+                    state.employees = JSON.parse(e.newValue);
+                    break;
+                case NS.departments:
+                    state.departments = JSON.parse(e.newValue);
+                    break;
+                case NS.compensations:
+                    state.compensations = JSON.parse(e.newValue);
+                    break;
+                case NS.locations:
+                    state.locations = JSON.parse(e.newValue);
+                    break;
+                case NS.ui:
+                    state.ui = JSON.parse(e.newValue);
+                    break;
+                default:
+                    return;
+            }
+            renderAll();
+        }); // [7][17]
+
+        /* ---------------- Initialize ---------------- */
+        document.addEventListener("DOMContentLoaded", () => {
+            boot();
+        });
+    </script>
+</body>
+
+</html>
