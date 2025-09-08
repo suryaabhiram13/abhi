@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechFlow Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a0e27;
+            --secondary-dark: #1a1f3a;
+            --accent-blue: #00d4ff;
+            --accent-purple: #6366f1;
+            --accent-green: #10b981;
+            --accent-pink: #ec4899;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --border-color: #475569;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #00d4ff 0%, #6366f1 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.1) rotate(2deg);
+            }
+        }
+
+        .sidebar {
+            width: 280px;
+            min-width: 280px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-brand {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--accent-blue);
+            text-align: center;
+            padding: 25px 15px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .sidebar-brand::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: var(--gradient-secondary);
+        }
+
+        .nav-link {
+            border-radius: 12px;
+            margin-bottom: 8px;
+            padding: 14px 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-secondary);
+            font-weight: 500;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-secondary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-blue);
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateX(8px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .nav-link:hover::before {
+            left: 0;
+        }
+
+        .nav-link.active {
+            background: var(--gradient-secondary);
+            color: white;
+            font-weight: 600;
+            box-shadow: var(--shadow-glow);
+            border-color: var(--accent-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+        }
+
+        .main-content {
+            background: transparent;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .top-bar {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .content-wrapper {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none !important;
+        }
+
+        .tab-pane.active {
+            display: block !important;
+        }
+
+        .tech-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        .tech-card-header {
+            background: rgba(51, 65, 85, 0.8);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 25px;
+            font-weight: 600;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .tech-card-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--gradient-secondary);
+        }
+
+        .tech-card-body {
+            padding: 25px;
+        }
+
+        .stats-card {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-secondary);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
+        }
+
+        .stats-card.primary::before {
+            background: var(--gradient-secondary);
+        }
+
+        .stats-card.success::before {
+            background: var(--gradient-success);
+        }
+
+        .stats-card.warning::before {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .stats-card.info::before {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .stats-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .tech-btn {
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+        }
+
+        .tech-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .tech-btn-primary {
+            background: var(--gradient-secondary);
+            color: white;
+            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.3);
+        }
+
+        .tech-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4);
+        }
+
+        .tech-btn-success {
+            background: var(--gradient-success);
+            color: white;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .tech-btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .navbar-tech {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 25px;
+        }
+
+        .navbar-brand-tech {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 1.4rem;
+            background: var(--gradient-secondary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .department-item {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .department-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .department-header {
+            background: rgba(51, 65, 85, 0.8);
+            padding: 18px 25px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .department-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-secondary);
+            transition: width 0.3s ease;
+        }
+
+        .department-header:hover::after {
+            width: 100%;
+        }
+
+        .department-content {
+            padding: 25px;
+            background: rgba(30, 41, 59, 0.6);
+        }
+
+        .form-control-tech {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-control-tech:focus {
+            background: rgba(51, 65, 85, 1);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .form-control-tech::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .table-tech {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-tech thead {
+            background: var(--gradient-secondary);
+        }
+
+        .table-tech th {
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            color: white;
+        }
+
+        .table-tech td {
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            background: rgba(30, 41, 59, 0.4);
+        }
+
+        .activity-item {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--gradient-secondary);
+        }
+
+        .activity-item:hover {
+            transform: translateX(8px);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .code-highlight {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-blue);
+        }
+
+        /* Glowing effects */
+        .glow-blue {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .glow-green {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Modal styling */
+        .modal-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .d-flex {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100% !important;
+                min-width: auto;
+                height: auto !important;
+            }
+
+            .content-wrapper {
+                padding: 20px;
+            }
+
+            .top-bar {
+                padding: 15px 20px;
+            }
+        }
+
+        /* Loading animations */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Tech Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-tech">
+        <div class="container-fluid">
+            <a class="navbar-brand navbar-brand-tech" href="#">
+                <i class="fas fa-code me-2"></i>TechFlow Admin
+            </a>
+            <div class="ms-auto d-flex align-items-center">
+                <button class="btn btn-outline-info btn-sm me-3 tech-btn">
+                    <i class="fas fa-user-plus me-1"></i>Add Developer
+                </button>
+                <button class="btn logout-btn" onclick="premiumLogout()">
+                    <i class="fas fa-power-off me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Layout -->
+    <div class="d-flex">
+        <!-- Tech Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-terminal me-2"></i>
+                DevOps Console
+            </div>
+            <div class="px-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="#home" class="nav-link active" data-bs-toggle="tab">
+                            <i class="fas fa-chart-pie"></i>Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#people" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-users-cog"></i>Developers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#profile" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-user-circle"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#compensation" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-wallet"></i>Compensation
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#emergency" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-shield-alt"></i>Emergency
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#timeoff" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-clock"></i>Time Tracking
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#performance" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-rocket"></i>Performance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#files" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-cloud"></i>Cloud Storage
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#onboarding" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-laptop-code"></i>Onboarding
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#departments" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-project-diagram"></i>Teams
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#divisions" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-network-wired"></i>Divisions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#locations" class="nav-link" data-bs-toggle="tab">
+                            <i class="fas fa-globe-americas"></i>Offices
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="tab-content flex-grow-1 main-content">
+
+            <!-- Home Tab -->
+            <div class="tab-pane show active" id="home">
+                <div class="top-bar">
+                    <h1 class="page-title">System Dashboard</h1>
+                    <p class="page-subtitle">Real-time monitoring and analytics for your development ecosystem</p>
+                </div>
+
+                <div class="content-wrapper">
+                    <!-- Stats Cards -->
+                    <div class="row mb-5">
+                        <div class="col-md-3">
+                            <div class="stats-card primary">
+                                <div class="stats-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="stats-number">847</div>
+                                <div class="stats-label">Active Developers</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card success">
+                                <div class="stats-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stats-number">789</div>
+                                <div class="stats-label">Online Now</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card warning">
+                                <div class="stats-icon">
+                                    <i class="fas fa-bug"></i>
+                                </div>
+                                <div class="stats-number">23</div>
+                                <div class="stats-label">Open Issues</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card info">
+                                <div class="stats-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <div class="stats-number">12</div>
+                                <div class="stats-label">Deployments</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="tech-card glow-blue">
+                        <div class="tech-card-header">
+                            <h5><i class="fas fa-terminal me-2"></i>System Activity Log</h5>
+                        </div>
+                        <div class="tech-card-body">
+                            <div class="activity-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>john.dev</strong> pushed to <span class="code-highlight">main</span>
+                                        branch
+                                        <small class="text-muted d-block">2 minutes ago • 3 commits</small>
+                                    </div>
+                                    <span class="badge bg-success">Git Push</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>sarah.frontend</strong> deployed to <span
+                                            class="code-highlight">staging</span>
+                                        <small class="text-muted d-block">15 minutes ago • v2.1.3</small>
+                                    </div>
+                                    <span class="badge bg-warning">Deploy</span>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>mike.backend</strong> created new API endpoint
+                                        <small class="text-muted d-block">1 hour ago • /api/v2/users</small>
+                                    </div>
+                                    <span class="badge bg-info">API</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- People Tab -->
+            <div class="tab-pane" id="people">
+                <div class="top-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="page-title">Developer Management</h1>
+                            <p class="page-subtitle">Manage your development team and track productivity</p>
+                        </div>
+                        <button class="btn tech-btn tech-btn-success">
+                            <i class="fas fa-user-plus me-2"></i>Add Developer
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <!-- Search and Filter -->
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control form-control-tech"
+                                        placeholder="Search developers...">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select form-control-tech">
+                                        <option>All Teams</option>
+                                        <option>Frontend</option>
+                                        <option>Backend</option>
+                                        <option>DevOps</option>
+                                        <option>Mobile</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select form-control-tech">
+                                        <option>All Stacks</option>
+                                        <option>React/Node.js</option>
+                                        <option>Python/Django</option>
+                                        <option>Java/Spring</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn tech-btn tech-btn-primary w-100">Filter</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Developer Table -->
+                    <div class="table-responsive">
+                        <table class="table table-tech">
+                            <thead>
+                                <tr>
+                                    <th>Developer</th>
+                                    <th>Team</th>
+                                    <th>Tech Stack</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://via.placeholder.com/40" class="rounded-circle me-3"
+                                                alt="Avatar">
+                                            <div>
+                                                <div class="fw-bold">Nicholas Swatz</div>
+                                                <small class="text-muted">nick.dev@techflow.com</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Frontend</td>
+                                    <td>React, TypeScript</td>
+                                    <td>Remote - SF</td>
+                                    <td><span class="badge bg-success">Online</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-info btn-sm me-1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other tabs with tech styling -->
+            <div class="tab-pane" id="profile">
+                <div class="top-bar">
+                    <h1 class="page-title">Admin Profile</h1>
+                    <p class="page-subtitle">System administrator settings and preferences</p>
+                </div>
+                <div class="content-wrapper">
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <p>System administrator profile and configuration settings...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="compensation">
+                <div class="top-bar">
+                    <h1 class="page-title">Compensation Engine</h1>
+                    <p class="page-subtitle">Salary algorithms and compensation analytics</p>
+                </div>
+                <div class="content-wrapper">
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <p>Developer compensation and benefits management system...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="emergency">
+                <div class="top-bar">
+                    <h1 class="page-title">Emergency Response</h1>
+                    <p class="page-subtitle">System alerts and emergency contact protocols</p>
+                </div>
+                <div class="content-wrapper">
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <p>Emergency response system and incident management...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="timeoff">
+                <div class="top-bar">
+                    <h1 class="page-title">Time Tracking System</h1>
+                    <p class="page-subtitle">Developer productivity and time management</p>
+                </div>
+                <div class="content-wrapper">
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <p>Advanced time tracking and productivity analytics...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="performance">
+                <div class="top-bar">
+                    <h1 class="page-title">Performance Analytics</h1>
+                    <p class="page-subtitle">Code quality metrics and developer performance</p>
+                </div>
+                <div class="content-wrapper">
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <p>Performance monitoring and code quality analysis...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="files">
+                <div class="top-bar">
+                    <h1 class="page-title">Cloud Storage</h1>
+                    <p class="page-subtitle">Document management and cloud infrastructure</p>
+                </div>
+                <div class="content-wrapper">
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <p>Cloud-based file storage and version control system...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="onboarding">
+                <div class="top-bar">
+                    <h1 class="page-title">Developer Onboarding</h1>
+                    <p class="page-subtitle">Automated onboarding and skill assessment</p>
+                </div>
+                <div class="content-wrapper">
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <p>Automated developer onboarding and training pipeline...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Teams Tab (formerly Departments) -->
+            <div class="tab-pane" id="departments">
+                <div class="top-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="page-title">Team Management</h1>
+                            <p class="page-subtitle">Development teams and project allocation</p>
+                        </div>
+                        <button class="btn tech-btn tech-btn-success" data-bs-toggle="modal"
+                            data-bs-target="#addDepartmentModal">
+                            <i class="fas fa-plus me-2"></i>Create Team
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <div id="departmentsList">
+                        <!-- Teams will be dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="divisions">
+                <div class="top-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="page-title">System Architecture</h1>
+                            <p class="page-subtitle">Microservices and system divisions</p>
+                        </div>
+                        <button class="btn tech-btn tech-btn-success">
+                            <i class="fas fa-plus me-2"></i>Add Service
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="tech-card glow-blue">
+                                <div class="tech-card-body text-center">
+                                    <h5 class="card-title">Frontend Services</h5>
+                                    <p class="card-text">React, Vue.js applications</p>
+                                    <button class="btn tech-btn tech-btn-primary">Monitor</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="tech-card glow-green">
+                                <div class="tech-card-body text-center">
+                                    <h5 class="card-title">Backend APIs</h5>
+                                    <p class="card-text">Node.js, Python microservices</p>
+                                    <button class="btn tech-btn tech-btn-primary">Monitor</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="tech-card glow-purple">
+                                <div class="tech-card-body text-center">
+                                    <h5 class="card-title">DevOps Pipeline</h5>
+                                    <p class="card-text">CI/CD and infrastructure</p>
+                                    <button class="btn tech-btn tech-btn-primary">Monitor</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="locations">
+                <div class="top-bar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="page-title">Global Offices</h1>
+                            <p class="page-subtitle">Worldwide development centers and remote hubs</p>
+                        </div>
+                        <button class="btn tech-btn tech-btn-success">
+                            <i class="fas fa-plus me-2"></i>Add Office
+                        </button>
+                    </div>
+                </div>
+
+                <div class="content-wrapper">
+                    <div class="table-responsive">
+                        <table class="table table-tech">
+                            <thead>
+                                <tr>
+                                    <th>Office</th>
+                                    <th>Address</th>
+                                    <th>Developers</th>
+                                    <th>Tech Lead</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Silicon Valley HQ</td>
+                                    <td>1 Hacker Way, Menlo Park, CA 94025</td>
+                                    <td>250</td>
+                                    <td>Robert Chen</td>
+                                    <td><span class="badge bg-success">Online</span></td>
+                                    <td>
+                                        <button class="btn btn-outline-info btn-sm me-1">
+                                            <i class="fas fa-monitor-heart-rate"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-cogs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modals with tech styling -->
+    <!-- Add Team Modal -->
+    <div class="modal fade" id="addDepartmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Team</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDepartmentForm">
+                        <div class="mb-3">
+                            <label for="deptName" class="form-label">Team Name</label>
+                            <input type="text" class="form-control form-control-tech" id="deptName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptHead" class="form-label">Team Lead</label>
+                            <input type="text" class="form-control form-control-tech" id="deptHead" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptLocation" class="form-label">Location</label>
+                            <input type="text" class="form-control form-control-tech" id="deptLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptBudget" class="form-label">Budget Allocation</label>
+                            <input type="number" class="form-control form-control-tech" id="deptBudget" step="0.01"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="deptDescription" class="form-label">Tech Stack & Description</label>
+                            <textarea class="form-control form-control-tech" id="deptDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn tech-btn tech-btn-success" onclick="saveDepartment()">Create
+                        Team</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Team Modal -->
+    <div class="modal fade" id="editDepartmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Team</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editDepartmentForm">
+                        <input type="hidden" id="editDeptId">
+                        <div class="mb-3">
+                            <label for="editDeptName" class="form-label">Team Name</label>
+                            <input type="text" class="form-control form-control-tech" id="editDeptName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDeptHead" class="form-label">Team Lead</label>
+                            <input type="text" class="form-control form-control-tech" id="editDeptHead" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDeptLocation" class="form-label">Location</label>
+                            <input type="text" class="form-control form-control-tech" id="editDeptLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDeptBudget" class="form-label">Budget Allocation</label>
+                            <input type="number" class="form-control form-control-tech" id="editDeptBudget" step="0.01"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDeptDescription" class="form-label">Tech Stack & Description</label>
+                            <textarea class="form-control form-control-tech" id="editDeptDescription"
+                                rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn tech-btn tech-btn-primary" onclick="updateDepartment()">Update
+                        Team</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteDepartmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this team?</p>
+                    <p><strong id="deleteDeptName"></strong></p>
+                    <input type="hidden" id="deleteDeptId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <!-- <script>
+        // Team Management Variables
+        let departments = JSON.parse(localStorage.getItem('teams')) || [];
+        let nextId = parseInt(localStorage.getItem('nextTeamId')) || 1;
+
+        // Initialize page
+        window.onload = () => {
+            loadDepartments();
+        };
+
+        // Load and display teams with tech styling
+        function loadDepartments() {
+            const container = document.getElementById('departmentsList');
+            container.innerHTML = '';
+
+            if (departments.length === 0) {
+                container.innerHTML = `
+                    <div class="tech-card">
+                        <div class="tech-card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No development teams found. Create your first team to get started!
+                            </div>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            departments.forEach(dept => {
+                const deptCard = `
+                    <div class="department-item">
+                        <div class="department-header" data-bs-toggle="collapse" data-bs-target="#dept-${dept.id}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-users-cog me-2"></i>${dept.name}</h6>
+                                    <small class="text-muted">Lead: ${dept.head} | ${dept.location}</small>
+                                </div>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="collapse" id="dept-${dept.id}">
+                            <div class="department-content">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Team Lead:</strong> ${dept.head}</p>
+                                        <p><strong>Location:</strong> ${dept.location}</p>
+                                        <p><strong>Budget:</strong> <span class="code-highlight">$${parseFloat(dept.budget).toLocaleString()}</span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Tech Stack & Description:</strong></p>
+                                        <p>${dept.description || 'No description provided'}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button class="btn tech-btn tech-btn-primary btn-sm me-2" onclick="editDepartment(${dept.id})">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteDepartment(${dept.id})">
+                                        <i class="fas fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += deptCard;
+            });
+        }
+
+        // Save new team
+        function saveDepartment() {
+            const form = document.getElementById('addDepartmentForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const newDept = {
+                id: nextId++,
+                name: document.getElementById('deptName').value,
+                head: document.getElementById('deptHead').value,
+                location: document.getElementById('deptLocation').value,
+                budget: document.getElementById('deptBudget').value,
+                description: document.getElementById('deptDescription').value
+            };
+
+            departments.push(newDept);
+            localStorage.setItem('teams', JSON.stringify(departments));
+            localStorage.setItem('nextTeamId', nextId.toString());
+
+            // Reset form and close modal
+            form.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addDepartmentModal'));
+            modal.hide();
+
+            loadDepartments();
+        }
+
+        // Edit team
+        function editDepartment(id) {
+            const dept = departments.find(d => d.id === id);
+            if (!dept) return;
+
+            document.getElementById('editDeptId').value = dept.id;
+            document.getElementById('editDeptName').value = dept.name;
+            document.getElementById('editDeptHead').value = dept.head;
+            document.getElementById('editDeptLocation').value = dept.location;
+            document.getElementById('editDeptBudget').value = dept.budget;
+            document.getElementById('editDeptDescription').value = dept.description;
+
+            const modal = new bootstrap.Modal(document.getElementById('editDepartmentModal'));
+            modal.show();
+        }
+
+        // Update team
+        function updateDepartment() {
+            const form = document.getElementById('editDepartmentForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const id = parseInt(document.getElementById('editDeptId').value);
+            const deptIndex = departments.findIndex(d => d.id === id);
+
+            if (deptIndex !== -1) {
+                departments[deptIndex] = {
+                    id: id,
+                    name: document.getElementById('editDeptName').value,
+                    head: document.getElementById('editDeptHead').value,
+                    location: document.getElementById('editDeptLocation').value,
+                    budget: document.getElementById('editDeptBudget').value,
+                    description: document.getElementById('editDeptDescription').value
+                };
+
+                localStorage.setItem('teams', JSON.stringify(departments));
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editDepartmentModal'));
+                modal.hide();
+
+                loadDepartments();
+            }
+        }
+
+        // Delete team
+        function deleteDepartment(id) {
+            const dept = departments.find(d => d.id === id);
+            if (!dept) return;
+
+            document.getElementById('deleteDeptId').value = dept.id;
+            document.getElementById('deleteDeptName').textContent = dept.name;
+
+            const modal = new bootstrap.Modal(document.getElementById('deleteDepartmentModal'));
+            modal.show();
+        }
+
+        // Confirm delete
+        function confirmDelete() {
+            const id = parseInt(document.getElementById('deleteDeptId').value);
+            departments = departments.filter(d => d.id !== id);
+            localStorage.setItem('teams', JSON.stringify(departments));
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteDepartmentModal'));
+            modal.hide();
+
+            loadDepartments();
+        }
+
+        // Premium logout functionality
+        function premiumLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        }
+
+    </script> -->
+    <script>
+        // Enhanced Team Management with Explicit localStorage Operations
+        class DataManager {
+            constructor() {
+                this.departments = [];
+                this.employees = [];
+                this.nextDeptId = 1;
+                this.nextEmpId = 1;
+                this.initializeData();
+            }
+
+            // Initialize and load all data from localStorage
+            initializeData() {
+                try {
+                    // Explicitly load from localStorage
+                    const storedDepartments = localStorage.getItem('teams');
+                    const storedEmployees = localStorage.getItem('employees');
+                    const storedDeptId = localStorage.getItem('nextTeamId');
+                    const storedEmpId = localStorage.getItem('nextEmpId');
+
+                    this.departments = storedDepartments ? JSON.parse(storedDepartments) : [];
+                    this.employees = storedEmployees ? JSON.parse(storedEmployees) : [];
+                    this.nextDeptId = storedDeptId ? parseInt(storedDeptId) : 1;
+                    this.nextEmpId = storedEmpId ? parseInt(storedEmpId) : 1;
+
+                    console.log('✅ Data loaded from localStorage:', {
+                        departments: this.departments.length,
+                        employees: this.employees.length,
+                        nextDeptId: this.nextDeptId,
+                        nextEmpId: this.nextEmpId
+                    });
+
+                    this.validateAndCleanData();
+                } catch (error) {
+                    console.error('❌ Error loading from localStorage:', error);
+                    this.resetToDefaults();
+                }
+            }
+
+            // Explicitly save departments to localStorage
+            saveDepartments() {
+                try {
+                    const departmentsJson = JSON.stringify(this.departments);
+                    localStorage.setItem('teams', departmentsJson);
+                    console.log('✅ Departments saved to localStorage:', this.departments.length, 'departments');
+                    return true;
+                } catch (error) {
+                    console.error('❌ Error saving departments to localStorage:', error);
+                    return false;
+                }
+            }
+
+            // Explicitly save employees to localStorage
+            saveEmployees() {
+                try {
+                    const employeesJson = JSON.stringify(this.employees);
+                    localStorage.setItem('employees', employeesJson);
+                    console.log('✅ Employees saved to localStorage:', this.employees.length, 'employees');
+                    return true;
+                } catch (error) {
+                    console.error('❌ Error saving employees to localStorage:', error);
+                    return false;
+                }
+            }
+
+            // Save metadata to localStorage
+            saveMetadata() {
+                try {
+                    localStorage.setItem('nextTeamId', this.nextDeptId.toString());
+                    localStorage.setItem('nextEmpId', this.nextEmpId.toString());
+                    localStorage.setItem('lastSync', new Date().toISOString());
+                    console.log('✅ Metadata saved to localStorage');
+                    return true;
+                } catch (error) {
+                    console.error('❌ Error saving metadata to localStorage:', error);
+                    return false;
+                }
+            }
+
+            // Comprehensive sync to localStorage
+            syncAllData() {
+                console.log('🔄 Starting localStorage sync...');
+
+                const deptSaved = this.saveDepartments();
+                const empSaved = this.saveEmployees();
+                const metaSaved = this.saveMetadata();
+
+                if (deptSaved && empSaved && metaSaved) {
+                    console.log('✅ All data successfully synced to localStorage');
+                    this.showStorageStatus();
+                    return true;
+                } else {
+                    console.error('❌ Some data failed to sync to localStorage');
+                    return false;
+                }
+            }
+
+            // Show current localStorage status
+            showStorageStatus() {
+                const storage = {
+                    teams: localStorage.getItem('teams'),
+                    employees: localStorage.getItem('employees'),
+                    nextTeamId: localStorage.getItem('nextTeamId'),
+                    nextEmpId: localStorage.getItem('nextEmpId'),
+                    lastSync: localStorage.getItem('lastSync')
+                };
+
+                console.log('📊 Current localStorage status:', {
+                    teamsSize: storage.teams ? storage.teams.length : 0,
+                    employeesSize: storage.employees ? storage.employees.length : 0,
+                    nextTeamId: storage.nextTeamId,
+                    nextEmpId: storage.nextEmpId,
+                    lastSync: storage.lastSync
+                });
+            }
+
+            // Add department with explicit localStorage save
+            addDepartment(deptData) {
+                const newDept = {
+                    id: this.nextDeptId++,
+                    ...deptData,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                this.departments.push(newDept);
+
+                // Explicitly save to localStorage
+                if (this.syncAllData()) {
+                    console.log('✅ Department added and saved to localStorage:', newDept.name);
+                    return newDept;
+                } else {
+                    // Rollback if save failed
+                    this.departments.pop();
+                    this.nextDeptId--;
+                    throw new Error('Failed to save department to localStorage');
+                }
+            }
+
+            // Add employee with explicit localStorage save
+            addEmployee(empData) {
+                const hourlyRate = parseFloat(empData.hourlyRate);
+                const hoursPerWeek = parseFloat(empData.hoursPerWeek) || 40;
+
+                const weeklySalary = hourlyRate * hoursPerWeek;
+                const monthlySalary = weeklySalary * 4.33;
+                const annualSalary = monthlySalary * 12;
+
+                const newEmployee = {
+                    id: this.nextEmpId++,
+                    ...empData,
+                    hourlyRate: hourlyRate,
+                    hoursPerWeek: hoursPerWeek,
+                    weeklySalary: weeklySalary,
+                    monthlySalary: monthlySalary,
+                    annualSalary: annualSalary,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                this.employees.push(newEmployee);
+
+                // Explicitly save to localStorage
+                if (this.syncAllData()) {
+                    console.log('✅ Employee added and saved to localStorage:', newEmployee.name);
+                    return newEmployee;
+                } else {
+                    // Rollback if save failed
+                    this.employees.pop();
+                    this.nextEmpId--;
+                    throw new Error('Failed to save employee to localStorage');
+                }
+            }
+
+            // Update department with explicit localStorage save
+            updateDepartment(id, deptData) {
+                const index = this.departments.findIndex(d => d.id === id);
+                if (index === -1) return false;
+
+                const originalDept = { ...this.departments[index] };
+
+                this.departments[index] = {
+                    ...this.departments[index],
+                    ...deptData,
+                    updatedAt: new Date().toISOString()
+                };
+
+                // Explicitly save to localStorage
+                if (this.syncAllData()) {
+                    console.log('✅ Department updated and saved to localStorage:', deptData.name);
+                    return true;
+                } else {
+                    // Rollback if save failed
+                    this.departments[index] = originalDept;
+                    throw new Error('Failed to update department in localStorage');
+                }
+            }
+
+            // Update employee with explicit localStorage save
+            updateEmployee(id, empData) {
+                const index = this.employees.findIndex(e => e.id === id);
+                if (index === -1) return false;
+
+                const originalEmp = { ...this.employees[index] };
+
+                const hourlyRate = parseFloat(empData.hourlyRate);
+                const hoursPerWeek = parseFloat(empData.hoursPerWeek) || 40;
+
+                const weeklySalary = hourlyRate * hoursPerWeek;
+                const monthlySalary = weeklySalary * 4.33;
+                const annualSalary = monthlySalary * 12;
+
+                this.employees[index] = {
+                    ...this.employees[index],
+                    ...empData,
+                    hourlyRate: hourlyRate,
+                    hoursPerWeek: hoursPerWeek,
+                    weeklySalary: weeklySalary,
+                    monthlySalary: monthlySalary,
+                    annualSalary: annualSalary,
+                    updatedAt: new Date().toISOString()
+                };
+
+                // Explicitly save to localStorage
+                if (this.syncAllData()) {
+                    console.log('✅ Employee updated and saved to localStorage:', empData.name);
+                    return true;
+                } else {
+                    // Rollback if save failed
+                    this.employees[index] = originalEmp;
+                    throw new Error('Failed to update employee in localStorage');
+                }
+            }
+
+            // Delete department with explicit localStorage save
+            deleteDepartment(id) {
+                const deptIndex = this.departments.findIndex(d => d.id === id);
+                if (deptIndex === -1) return false;
+
+                const removedDept = this.departments[deptIndex];
+                const removedEmployees = this.employees.filter(emp => emp.departmentId === id);
+
+                // Remove department and associated employees
+                this.departments = this.departments.filter(d => d.id !== id);
+                this.employees = this.employees.filter(emp => emp.departmentId !== id);
+
+                // Explicitly save to localStorage
+                if (this.syncAllData()) {
+                    console.log('✅ Department and employees deleted and saved to localStorage:', removedDept.name);
+                    return true;
+                } else {
+                    // Rollback if save failed
+                    this.departments.splice(deptIndex, 0, removedDept);
+                    this.employees.push(...removedEmployees);
+                    throw new Error('Failed to delete department from localStorage');
+                }
+            }
+
+            // Delete employee with explicit localStorage save
+            deleteEmployee(id) {
+                const empIndex = this.employees.findIndex(e => e.id === id);
+                if (empIndex === -1) return false;
+
+                const removedEmp = this.employees[empIndex];
+                this.employees = this.employees.filter(e => e.id !== id);
+
+                // Explicitly save to localStorage
+                if (this.syncAllData()) {
+                    console.log('✅ Employee deleted and saved to localStorage:', removedEmp.name);
+                    return true;
+                } else {
+                    // Rollback if save failed
+                    this.employees.splice(empIndex, 0, removedEmp);
+                    throw new Error('Failed to delete employee from localStorage');
+                }
+            }
+
+            // Validate and clean orphaned data
+            validateAndCleanData() {
+                const validDeptIds = this.departments.map(dept => dept.id);
+                const originalEmployeeCount = this.employees.length;
+
+                this.employees = this.employees.filter(emp =>
+                    validDeptIds.includes(emp.departmentId)
+                );
+
+                if (this.employees.length !== originalEmployeeCount) {
+                    console.log(`🧹 Cleaned ${originalEmployeeCount - this.employees.length} orphaned employees`);
+                    this.saveEmployees();
+                }
+
+                this.updateIdSequences();
+            }
+
+            updateIdSequences() {
+                if (this.departments.length > 0) {
+                    this.nextDeptId = Math.max(...this.departments.map(d => d.id)) + 1;
+                }
+                if (this.employees.length > 0) {
+                    this.nextEmpId = Math.max(...this.employees.map(e => e.id)) + 1;
+                }
+                this.saveMetadata();
+            }
+        }
+
+        // Initialize global data manager
+        const dataManager = new DataManager();
+
+        // Debug functions to verify localStorage
+        function debugLocalStorage() {
+            console.log('🔍 Debug: Current localStorage contents:');
+            console.log('Teams:', localStorage.getItem('teams'));
+            console.log('Employees:', localStorage.getItem('employees'));
+            console.log('Next Team ID:', localStorage.getItem('nextTeamId'));
+            console.log('Next Employee ID:', localStorage.getItem('nextEmpId'));
+            console.log('Last Sync:', localStorage.getItem('lastSync'));
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ This will delete ALL data from localStorage. Are you sure?')) {
+                localStorage.removeItem('teams');
+                localStorage.removeItem('employees');
+                localStorage.removeItem('nextTeamId');
+                localStorage.removeItem('nextEmpId');
+                localStorage.removeItem('lastSync');
+
+                console.log('🗑️ All data cleared from localStorage');
+                location.reload();
+            }
+        }
+
+        // Verify localStorage on page load
+        window.onload = () => {
+            console.log('🚀 Page loaded, verifying localStorage...');
+            debugLocalStorage();
+
+            loadDepartments();
+            loadDepartmentOptions();
+            calculateTotalCompensation();
+            setupAutoSync();
+
+            // Add debug buttons to page (optional)
+            addDebugTools();
+        };
+
+        // Add debug tools to page
+        function addDebugTools() {
+            const debugPanel = document.createElement('div');
+            debugPanel.id = 'debugPanel';
+            debugPanel.style.cssText = 'position: fixed; bottom: 10px; right: 10px; z-index: 9999; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px;';
+            debugPanel.innerHTML = `
+        <div><strong>Debug Tools</strong></div>
+        <button onclick="debugLocalStorage()" class="btn btn-sm btn-info mt-1">Check Storage</button>
+        <button onclick="dataManager.showStorageStatus()" class="btn btn-sm btn-success mt-1">Storage Status</button>
+        <button onclick="clearAllData()" class="btn btn-sm btn-danger mt-1">Clear All</button>
+        <div class="mt-2">
+            <small>Depts: <span id="debugDeptCount">${dataManager.departments.length}</span></small><br>
+            <small>Emps: <span id="debugEmpCount">${dataManager.employees.length}</span></small>
+        </div>
+    `;
+
+            document.body.appendChild(debugPanel);
+        }
+
+        // Update debug counts
+        function updateDebugCounts() {
+            const deptCount = document.getElementById('debugDeptCount');
+            const empCount = document.getElementById('debugEmpCount');
+
+            if (deptCount) deptCount.textContent = dataManager.departments.length;
+            if (empCount) empCount.textContent = dataManager.employees.length;
+        }
+
+        // Enhanced save functions with localStorage verification
+        function saveDepartment() {
+            const form = document.getElementById('addDepartmentForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const deptData = {
+                name: document.getElementById('deptName').value,
+                category: document.getElementById('deptCategory').value,
+                head: document.getElementById('deptHead').value,
+                location: document.getElementById('deptLocation').value,
+                budget: document.getElementById('deptBudget').value,
+                description: document.getElementById('deptDescription').value
+            };
+
+            try {
+                console.log('💾 Attempting to save department to localStorage...');
+                const newDept = dataManager.addDepartment(deptData);
+
+                // Verify save by checking localStorage directly
+                const storedData = JSON.parse(localStorage.getItem('teams'));
+                const savedDept = storedData.find(d => d.id === newDept.id);
+
+                if (savedDept) {
+                    console.log('✅ Verified: Department successfully saved to localStorage');
+
+                    // Reset form and close modal
+                    form.reset();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addDepartmentModal'));
+                    modal.hide();
+
+                    // Refresh views
+                    loadDepartments();
+                    loadDepartmentOptions();
+                    calculateTotalCompensation();
+                    updateDebugCounts();
+
+                    showSyncSuccess(`Department "${newDept.name}" saved to localStorage`);
+                } else {
+                    throw new Error('Department not found in localStorage after save');
+                }
+            } catch (error) {
+                console.error('❌ Failed to save department:', error);
+                showSyncError('Failed to save department: ' + error.message);
+            }
+        }
+
+        function saveEmployee() {
+            const form = document.getElementById('addEmployeeForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const empData = {
+                departmentId: parseInt(document.getElementById('empDepartmentId').value),
+                name: document.getElementById('empName').value,
+                position: document.getElementById('empPosition').value,
+                email: document.getElementById('empEmail').value,
+                hourlyRate: document.getElementById('empHourlyRate').value,
+                hoursPerWeek: document.getElementById('empHoursPerWeek').value || 40,
+                startDate: document.getElementById('empStartDate').value
+            };
+
+            try {
+                console.log('💾 Attempting to save employee to localStorage...');
+                const newEmp = dataManager.addEmployee(empData);
+
+                // Verify save by checking localStorage directly
+                const storedData = JSON.parse(localStorage.getItem('employees'));
+                const savedEmp = storedData.find(e => e.id === newEmp.id);
+
+                if (savedEmp) {
+                    console.log('✅ Verified: Employee successfully saved to localStorage');
+
+                    // Reset form and close modal
+                    form.reset();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal'));
+                    modal.hide();
+
+                    // Refresh views
+                    loadDepartments();
+                    calculateTotalCompensation();
+                    updateDebugCounts();
+
+                    showSyncSuccess(`Employee "${newEmp.name}" saved to localStorage`);
+                } else {
+                    throw new Error('Employee not found in localStorage after save');
+                }
+            } catch (error) {
+                console.error('❌ Failed to save employee:', error);
+                showSyncError('Failed to save employee: ' + error.message);
+            }
+        }
+
+        // Setup automatic sync with localStorage verification
+        function setupAutoSync() {
+            setInterval(() => {
+                console.log('⏰ Auto-sync: Verifying localStorage integrity...');
+
+                // Verify localStorage data matches memory
+                const storedDepts = JSON.parse(localStorage.getItem('teams') || '[]');
+                const storedEmps = JSON.parse(localStorage.getItem('employees') || '[]');
+
+                if (storedDepts.length !== dataManager.departments.length ||
+                    storedEmps.length !== dataManager.employees.length) {
+                    console.log('⚠️ Data mismatch detected, forcing sync...');
+                    dataManager.syncAllData();
+                } else {
+                    console.log('✅ Auto-sync: localStorage data verified');
+                }
+
+                updateDebugCounts();
+            }, 30000); // Every 30 seconds
+        }
+
+        // Show storage success with localStorage size info
+        function showSyncSuccess(message) {
+            const storageSize = JSON.stringify(localStorage).length;
+            const fullMessage = `${message} (Storage: ${(storageSize / 1024).toFixed(1)}KB)`;
+
+            const toast = createToast('success', fullMessage);
+            document.body.appendChild(toast);
+            new bootstrap.Toast(toast).show();
+        }
+
+        function createToast(type, message) {
+            const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white ${bgClass} border-0 position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+            toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="${icon} me-2"></i>${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    document.body.removeChild(toast);
+                }
+            }, 4000);
+
+            return toast;
+        }
+
+        // Additional localStorage verification functions
+        function verifyDataIntegrity() {
+            try {
+                const teamsData = localStorage.getItem('teams');
+                const employeesData = localStorage.getItem('employees');
+
+                if (!teamsData || !employeesData) {
+                    console.log('⚠️ Missing data in localStorage');
+                    return false;
+                }
+
+                const teams = JSON.parse(teamsData);
+                const employees = JSON.parse(employeesData);
+
+                console.log('✅ Data integrity verified:', {
+                    teams: teams.length,
+                    employees: employees.length,
+                    totalSize: (teamsData.length + employeesData.length)
+                });
+
+                return true;
+            } catch (error) {
+                console.error('❌ Data integrity check failed:', error);
+                return false;
+            }
+        }
+
+        // Export current localStorage data for backup
+        function exportLocalStorage() {
+            const data = {
+                teams: localStorage.getItem('teams'),
+                employees: localStorage.getItem('employees'),
+                nextTeamId: localStorage.getItem('nextTeamId'),
+                nextEmpId: localStorage.getItem('nextEmpId'),
+                lastSync: localStorage.getItem('lastSync'),
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `localStorage-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            console.log('📦 localStorage data exported');
+        }
+    </script>
+
+</body>
+
+</html>
