@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login Page (Admin & User)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #d9dbe4, #131b0d);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        .login-container {
+            background: #fff;
+            padding: 40px 30px 32px 30px;
+            border-radius: 18px;
+            box-shadow: rgba(44, 62, 80, 0.18) 0px 10px 40px;
+            max-width: 340px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        label {
+            font-size: 15px;
+            margin-bottom: 5px;
+            color: #6a89cc;
+            align-self: flex-start;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px 14px;
+            margin-bottom: 18px;
+            border: 1.5px solid #e0e4e8;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #f9fbfd;
+            transition: border 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #6a89cc;
+            background: #eef7fe;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 0;
+            background: linear-gradient(90deg, #6a89cc 40%, #b8e994 100%);
+            color: #fff;
+            font-size: 17px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.2s;
+            box-shadow: 0 2px 14px rgba(106, 137, 204, 0.10);
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #5c73b5, #a3d497);
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-bottom: 8px;
+            min-height: 18px;
+            text-align: center;
+        }
+
+        @media (max-width: 400px) {
+            .login-container {
+                padding: 22px 10px 20px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <label for="role"><b>Role</b></label>
+        <select id="role">
+            <option value="user"><b>User</b></option>
+            <option value="admin"><b>Admin</b></option>
+        </select>
+        <label for="username">Username</label>
+        <input id="username" type="text" placeholder="Enter username">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Enter password">
+        <button id="myButton" disabled>Submit</button>
+        <div class="error" id="error"></div>
+    </div>
+    <script>
+        const users = [
+            { username: 'user1', password: 'pass1', role: 'user' },
+            { username: 'user2', password: 'pass2', role: 'user' },
+            { username: 'admin', password: 'admin123', role: 'admin' }
+        ];
+
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '';
+            const user = users.find(u => u.username === username && u.password === password && u.role === role);
+            if (user) {
+                if (role === 'admin') {
+                    window.location.href = 'admin1.html';
+                } else {
+                    window.location.href = 'index1.html';
+                }
+            } else {
+                errorDiv.textContent = 'Invalid credentials or role.';
+            }
+        }
+
+        // Add event listener to inputs for 'Enter' key press
+        document.addEventListener('DOMContentLoaded', () => {
+            ['username', 'password', 'role'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter') {
+                            login();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+
+</body>
+
+</html>

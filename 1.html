@@ -1,0 +1,634 @@
+  Bootstrap Bundle with Popper (required for tabs/modals)
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- App Script: wire up buttons and placeholders -->
+    <script>
+        // Replace placeholders with real implementations or API calls
+
+        // Navbar actions
+        document.getElementById('logoutBtn').addEventListener('click', premiumLogout);
+        document.getElementById('syncBtn').addEventListener('click', syncAllData);
+
+        // Filter buttons
+        document.getElementById('filterEmployeesBtn').addEventListener('click', filterEmployees);
+        document.getElementById('filterCompBtn').addEventListener('click', filterCompensations);
+
+        // Save buttons
+        document.getElementById('saveEmployeeBtn').addEventListener('click', saveEmployee);
+        document.getElementById('saveDepartmentBtn').addEventListener('click', saveDepartment);
+        document.getElementById('saveCompensationBtn').addEventListener('click', saveCompensation);
+
+        // When employee selected in compensation modal, populate info
+        document.getElementById('compEmployee').addEventListener('change', populateEmployeeInfo);
+
+        // Placeholder functions to avoid ReferenceError
+        function premiumLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = 'login.html';
+            }
+        }
+        function syncAllData() {
+            // TODO: implement sync
+            console.log('Sync data');
+        }
+
+        function showAddEmployeeModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addEmployeeModal'));
+            modal.show();
+        }
+
+        function showAddCompensationModal() {
+            const modal = new bootstrap.Modal(document.getElementById('addCompensationModal'));
+            modal.show();
+        }
+
+        function filterEmployees() {
+            // TODO: implement filtering logic
+            console.log('Filter employees');
+        }
+
+        function filterCompensations() {
+            // TODO: implement compensation filtering
+            console.log('Filter compensations');
+        }
+
+        function saveEmployee() {
+            // TODO: collect form data and persist
+            console.log('Save employee');
+            bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal'))?.hide();
+        }
+
+        function saveDepartment() {
+            // TODO: collect department data and persist
+            console.log('Save department');
+            bootstrap.Modal.getInstance(document.getElementById('addDepartmentModal'))?.hide();
+        }
+
+        function populateEmployeeInfo() {
+            // TODO: set compEmployeeId, compDepartment, compPosition based on selected employee
+            console.log('Populate employee info for compensation');
+        }
+
+        function saveCompensation() {
+            // TODO: collect compensation form data and persist
+            console.log('Save compensation');
+            bootstrap.Modal.getInstance(document.getElementById('addCompensationModal'))?.hide();
+        }
+        /* ---------------- Storage helpers ---------------- */
+        const LS = {
+            get(key, fallback) {
+                try {
+                    const v = localStorage.getItem(key);
+                    return v ? JSON.parse(v) : fallback;
+                } catch {
+                    return fallback;
+                }
+            }, // [17][3]
+            set(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            }, // [17][3]
+            remove(key) {
+                localStorage.removeItem(key);
+            }, // [17][19]
+            onChange(handler) {
+                window.addEventListener("storage", (e) => handler(e)); // sync other tabs
+            }, // [7][17]
+        };
+
+        const NS = {
+            employees: "app:employees",
+            departments: "app:departments",
+            compensations: "app:compensations",
+            emergency: "app:emergency",
+            timeoff: "app:timeoff",
+            performance: "app:performance",
+            files: "app:files",
+            onboarding: "app:onboarding",
+            locations: "app:locations",
+            ui: "app:ui",
+        }; // [3][17]
+
+        /* ---------------- App state ---------------- */
+        let state = {
+            employees: [],
+            departments: [],
+            compensations: [],
+            emergency: [],
+            timeoff: [],
+            performance: [],
+            files: [],
+            onboarding: [],
+            locations: [],
+            ui: { activeTab: "#home", lastLogin: new Date().toISOString() },
+        }; // [3][11]
+
+        /* ---------------- Bootstrap tab persistence ---------------- */
+        // Save tab on change
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach((a) => {
+            a.addEventListener("shown.bs.tab", (e) => {
+                state.ui.activeTab = e.target.getAttribute("href");
+                LS.set(NS.ui, state.ui);
+            });
+        }); // [1][2]
+
+        function restoreActiveTab() {
+            const ui = LS.get(NS.ui, state.ui);
+            state.ui = { ...state.ui, ...ui };
+            const sel = `[data-bs-toggle="tab"][href="${state.ui.activeTab}"]`;
+            const link = document.querySelector(sel);
+            if (link) new bootstrap.Tab(link).show();
+        } // [1][2]
+
+        /* ---------------- Boot: load from localStorage ---------------- */
+        function boot() {
+            state.employees = LS.get(NS.employees, []);
+            state.departments = LS.get(NS.departments, []);
+            state.compensations = LS.get(NS.compensations, []);
+            state.emergency = LS.get(NS.emergency, []);
+            state.timeoff = LS.get(NS.timeoff, []);
+            state.performance = LS.get(NS.performance, []);
+            state.files = LS.get(NS.files, []);
+            state.onboarding = LS.get(NS.onboarding, []);
+            state.locations = LS.get(NS.locations, []);
+            state.ui = LS.get(NS.ui, state.ui);
+            renderAll();
+            restoreActiveTab();
+        } // [17][3]
+
+        /* ---------------- Renderers ---------------- */
+        function money(n) {
+            return new Intl.NumberFormat(undefined, {
+                style: "currency",
+                currency: "USD",
+            }).format(n || 0);
+        } // [11]
+
+        function calcPayrollStats() {
+            const amounts = state.compensations.map((c) => Number(c.amount) || 0);
+            const total = amounts.reduce((a, b) => a + b, 0);
+            const count = state.compensations.length;
+            const avg = count ? total / count : 0;
+            const max = amounts.length ? Math.max(...amounts) : 0;
+            return { total, count, avg, max };
+        } // [11]
+
+        function renderDashboard() {
+            const totalEmployees = state.employees.length;
+            const activeEmployees = state.employees.filter(
+                (e) => e.status === "active"
+            ).length;
+            const totalDepartments = state.departments.length;
+            const payroll = calcPayrollStats().total;
+            document.getElementById("totalEmployees").textContent = totalEmployees;
+            document.getElementById("activeEmployees").textContent = activeEmployees;
+            document.getElementById("totalDepartments").textContent = totalDepartments;
+            document.getElementById("dashboardPayroll").textContent = money(payroll);
+            document.getElementById("lastLogin").textContent = new Date(
+                state.ui.lastLogin
+            ).toLocaleString();
+        } // [11]
+
+        function ensureSelectOptions() {
+            // Dept filters/selects
+            const deptSelects = [
+                document.getElementById("empDepartment"),
+                document.getElementById("filterEmployeeDepartment"),
+                document.getElementById("filterCompDepartment"),
+            ].filter(Boolean);
+            deptSelects.forEach((sel) => {
+                const keepFirst = sel.id !== "empDepartment";
+                const current = sel.value;
+                sel.innerHTML = "";
+                if (keepFirst) sel.append(new Option("All Departments", ""));
+                else sel.append(new Option("Select Department", ""));
+                state.departments.forEach((d) => sel.append(new Option(d.name, d.name)));
+                if (current) sel.value = current;
+            });
+
+            // Manager list = employees
+            const mgr = document.getElementById("empManager");
+            if (mgr) {
+                const cur = mgr.value;
+                mgr.innerHTML = "";
+                mgr.append(new Option("Select Manager", ""));
+                state.employees.forEach((e) =>
+                    mgr.append(new Option(`${e.firstName} ${e.lastName}`, e.empId))
+                );
+                if (cur) mgr.value = cur;
+            }
+
+            // Compensation employee list
+            const compEmp = document.getElementById("compEmployee");
+            if (compEmp) {
+                const cur = compEmp.value;
+                compEmp.innerHTML = "";
+                compEmp.append(new Option("Select Employee", ""));
+                state.employees.forEach((e) =>
+                    compEmp.append(new Option(`${e.firstName} ${e.lastName}`, e.empId))
+                );
+                if (cur) compEmp.value = cur;
+            }
+        } // [11]
+
+        function renderEmployees() {
+            const q = (
+                document.getElementById("searchEmployees").value || ""
+            ).toLowerCase();
+            const dept = document.getElementById("filterEmployeeDepartment").value || "";
+            const status = document.getElementById("filterEmployeeStatus").value || "";
+            const list = document.getElementById("employeesList");
+
+            const filtered = state.employees.filter((e) => {
+                const name = `${e.firstName} ${e.lastName}`.toLowerCase();
+                const okQ =
+                    !q ||
+                    name.includes(q) ||
+                    (e.email || "").toLowerCase().includes(q) ||
+                    (e.empId || "").toLowerCase().includes(q);
+                const okD = !dept || e.department === dept;
+                const okS = !status || e.status === status;
+                return okQ && okD && okS;
+            }); // [11]
+
+            list.innerHTML =
+                filtered
+                    .map(
+                        (e) => `
+    <div class="employee-item">
+      <div class="employee-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <img class="employee-avatar me-2" src="https://via.placeholder.com/40" alt="">
+          <strong>${e.firstName} ${e.lastName}</strong> &middot; ${e.position
+                            } &middot; ${e.department}
+        </div>
+        <div>
+          <span class="badge bg-${e.status === "active"
+                                ? "success"
+                                : e.status === "on-leave"
+                                    ? "warning"
+                                    : "secondary"
+                            } text-uppercase">${e.status}</span>
+          <button class="btn btn-sm btn-outline-primary btn-action" onclick="editEmployee('${e.empId
+                            }')"><i class="fa fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteEmployee('${e.empId
+                            }')"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="employee-content">
+        <div>Email: ${e.email} &middot; Phone: ${e.phone} &middot; Hire: ${e.hireDate
+                            }</div>
+        <div>Manager: ${managerName(e.manager) || "—"} &middot; Location: ${e.location || "—"
+                            }</div>
+      </div>
+    </div>
+  `
+                    )
+                    .join("") || '<div class="text-muted">No employees found.</div>';
+        } // [11]
+
+        function managerName(empId) {
+            const m = state.employees.find((x) => x.empId === empId);
+            return m ? `${m.firstName} ${m.lastName}` : "";
+        } // [11]
+
+        function renderDepartments() {
+            const container = document.getElementById("departmentsList");
+            container.innerHTML =
+                state.departments
+                    .map(
+                        (d) => `
+    <div class="department-item">
+      <div class="department-header d-flex justify-content-between">
+        <strong>${d.name}</strong>
+        <div>
+          <span class="badge text-bg-secondary">${d.location}</span>
+          <span class="badge text-bg-info">${money(d.budget)}</span>
+          <button class="btn btn-sm btn-outline-primary btn-action" onclick="editDepartment('${d.id
+                            }')"><i class="fa fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteDepartment('${d.id
+                            }')"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="department-content">
+        <div>Head: ${employeeName(d.headEmpId) || "—"}</div>
+        <div class="text-muted">${d.description || ""}</div>
+      </div>
+    </div>
+  `
+                    )
+                    .join("") || '<div class="text-muted">No departments yet.</div>';
+        } // [11]
+
+        function employeeName(empId) {
+            const e = state.employees.find((x) => x.empId === empId);
+            return e ? `${e.firstName} ${e.lastName}` : "";
+        } // [11]
+
+        function renderCompensations() {
+            const q = (
+                document.getElementById("searchCompensation").value || ""
+            ).toLowerCase();
+            const freq = document.getElementById("filterFrequency").value || "";
+            const dept = document.getElementById("filterCompDepartment").value || "";
+            const container = document.getElementById("compensationsList");
+
+            const rows = state.compensations
+                .map((c) => ({
+                    ...c,
+                    emp: state.employees.find((e) => e.empId === c.empId),
+                }))
+                .filter((x) => {
+                    const okQ =
+                        !q ||
+                        (x.emp &&
+                            `${x.emp.firstName} ${x.emp.lastName}`.toLowerCase().includes(q));
+                    const okF = !freq || x.frequency === freq;
+                    const okD = !dept || (x.emp && x.emp.department === dept);
+                    return okQ && okF && okD;
+                }); // [11]
+
+            container.innerHTML =
+                rows
+                    .map(
+                        (x) => `
+    <div class="compensation-item">
+      <div class="compensation-header d-flex justify-content-between">
+        <div><strong>${x.emp ? `${x.emp.firstName} ${x.emp.lastName}` : x.empId
+                            }</strong> &middot; ${x.frequency.toUpperCase()}</div>
+        <div>
+          <span class="badge bg-success salary-badge">${money(x.amount)}</span>
+          <button class="btn btn-sm btn-outline-primary btn-action" onclick="editCompensation('${x.id
+                            }')"><i class="fa fa-pen"></i></button>
+          <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteCompensation('${x.id
+                            }')"><i class="fa fa-trash"></i></button>
+        </div>
+      </div>
+      <div class="compensation-content">
+        <div>Dept: ${x.emp ? x.emp.department : "—"} &middot; Position: ${x.emp ? x.emp.position : "—"
+                            }</div>
+      </div>
+    </div>
+  `
+                    )
+                    .join("") || '<div class="text-muted">No compensation records.</div>';
+
+            const stats = calcPayrollStats();
+            document.getElementById("totalPayroll").textContent = money(stats.total);
+            document.getElementById("employeesWithPay").textContent = stats.count;
+            document.getElementById("avgSalary").textContent = money(stats.avg);
+            document.getElementById("highestPaid").textContent = money(stats.max);
+        } // [11]
+
+        function renderLocations() {
+            const tbody = document.getElementById("locationsTableBody");
+            tbody.innerHTML =
+                state.locations
+                    .map(
+                        (l) => `
+    <tr>
+      <td>${l.name}</td>
+      <td>${l.address || "—"}</td>
+      <td>${l.employees || 0}</td>
+      <td>${employeeName(l.managerEmpId) || "—"}</td>
+      <td><span class="badge ${l.status === "active" ? "bg-success" : "bg-secondary"
+                            }">${l.status || "active"}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary" onclick="editLocation('${l.id
+                            }')"><i class="fa fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteLocation('${l.id
+                            }')"><i class="fa fa-trash"></i></button>
+      </td>
+    </tr>
+  `
+                    )
+                    .join("") ||
+                '<tr><td colspan="6" class="text-muted">No locations.</td></tr>';
+        } // [11]
+
+        function renderAll() {
+            ensureSelectOptions();
+            renderDashboard();
+            renderEmployees();
+            renderDepartments();
+            renderCompensations();
+            renderLocations();
+        } // [11]
+
+        /* ---------------- CRUD wiring ---------------- */
+        // Employees
+        function saveEmployee() {
+            const e = {
+                empId: document.getElementById("empId").value.trim(),
+                firstName: document.getElementById("empFirstName").value.trim(),
+                lastName: document.getElementById("empLastName").value.trim(),
+                email: document.getElementById("empEmail").value.trim(),
+                phone: document.getElementById("empPhone").value.trim(),
+                dateOfBirth: document.getElementById("empDateOfBirth").value || "",
+                address: document.getElementById("empAddress").value || "",
+                department: document.getElementById("empDepartment").value || "",
+                position: document.getElementById("empPosition").value || "",
+                manager: document.getElementById("empManager").value || "",
+                hireDate: document.getElementById("empHireDate").value || "",
+                status: document.getElementById("empStatus").value || "active",
+                location: document.getElementById("empLocation").value || "",
+                emergency: {
+                    name: document.getElementById("empEmergencyName").value || "",
+                    phone: document.getElementById("empEmergencyPhone").value || "",
+                    relation: document.getElementById("empEmergencyRelation").value || "",
+                },
+            }; // [9][11]
+
+            const idx = state.employees.findIndex((x) => x.empId === e.empId);
+            if (idx >= 0) state.employees[idx] = e;
+            else state.employees.push(e);
+            LS.set(NS.employees, state.employees);
+            renderAll();
+            bootstrap.Modal.getInstance(
+                document.getElementById("addEmployeeModal")
+            )?.hide();
+        } // [9][11]
+
+        function editEmployee(empId) {
+            const e = state.employees.find((x) => x.empId === empId);
+            if (!e) return;
+            document.getElementById("empId").value = e.empId;
+            document.getElementById("empFirstName").value = e.firstName;
+            document.getElementById("empLastName").value = e.lastName;
+            document.getElementById("empEmail").value = e.email;
+            document.getElementById("empPhone").value = e.phone;
+            document.getElementById("empDateOfBirth").value = e.dateOfBirth || "";
+            document.getElementById("empAddress").value = e.address || "";
+            document.getElementById("empDepartment").value = e.department || "";
+            document.getElementById("empPosition").value = e.position || "";
+            document.getElementById("empManager").value = e.manager || "";
+            document.getElementById("empHireDate").value = e.hireDate || "";
+            document.getElementById("empStatus").value = e.status || "active";
+            document.getElementById("empLocation").value = e.location || "";
+            document.getElementById("empEmergencyName").value = e.emergency?.name || "";
+            document.getElementById("empEmergencyPhone").value = e.emergency?.phone || "";
+            document.getElementById("empEmergencyRelation").value =
+                e.emergency?.relation || "";
+            showAddEmployeeModal();
+        } // [9][11]
+
+        function deleteEmployee(empId) {
+            state.employees = state.employees.filter((x) => x.empId !== empId);
+            // also drop as manager references and comp records
+            state.compensations = state.compensations.filter((c) => c.empId !== empId);
+            state.departments = state.departments.map((d) =>
+                d.headEmpId === empId ? { ...d, headEmpId: "" } : d
+            );
+            LS.set(NS.employees, state.employees);
+            LS.set(NS.compensations, state.compensations);
+            LS.set(NS.departments, state.departments);
+            renderAll();
+        } // [11]
+
+        function filterEmployees() {
+            renderEmployees();
+        } // [11]
+
+        // Departments
+        function saveDepartment() {
+            const id = crypto.randomUUID();
+            const model = {
+                id,
+                name: document.getElementById("deptName").value.trim(),
+                headEmpId: document.getElementById("deptHead").value || "",
+                location: document.getElementById("deptLocation").value.trim(),
+                budget: Number(document.getElementById("deptBudget").value || 0),
+                description: document.getElementById("deptDescription").value || "",
+            }; // [6][11]
+
+            state.departments.push(model);
+            LS.set(NS.departments, state.departments);
+            renderAll();
+            bootstrap.Modal.getInstance(
+                document.getElementById("addDepartmentModal")
+            )?.hide();
+        } // [6][11]
+
+        function editDepartment(id) {
+            const d = state.departments.find((x) => x.id === id);
+            if (!d) return;
+            document.getElementById("deptName").value = d.name;
+            document.getElementById("deptHead").value = d.headEmpId || "";
+            document.getElementById("deptLocation").value = d.location;
+            document.getElementById("deptBudget").value = d.budget;
+            document.getElementById("deptDescription").value = d.description || "";
+            showAddDepartmentModal();
+        } // [6][11]
+
+        function showAddDepartmentModal() {
+            const modal = new bootstrap.Modal(
+                document.getElementById("addDepartmentModal")
+            );
+            modal.show();
+        } // [11]
+
+        function deleteDepartment(id) {
+            state.departments = state.departments.filter((x) => x.id !== id);
+            LS.set(NS.departments, state.departments);
+            renderAll();
+        } // [11]
+
+        // Compensation
+        function populateEmployeeInfo() {
+            const empId = document.getElementById("compEmployee").value;
+            const e = state.employees.find((x) => x.empId === empId);
+            document.getElementById("compEmployeeId").value = e?.empId || "";
+            document.getElementById("compDepartment").value = e?.department || "";
+            document.getElementById("compPosition").value = e?.position || "";
+        } // [11]
+
+        function saveCompensation() {
+            const id = crypto.randomUUID();
+            const model = {
+                id,
+                empId: document.getElementById("compEmployee").value,
+                amount: Number(document.getElementById("compAmount").value || 0),
+                frequency: document.getElementById("compFrequency").value,
+            }; // [6][11]
+
+            state.compensations.push(model);
+            LS.set(NS.compensations, state.compensations);
+            renderAll();
+            bootstrap.Modal.getInstance(
+                document.getElementById("addCompensationModal")
+            )?.hide();
+        } // [11]
+
+        function editCompensation(id) {
+            const c = state.compensations.find((x) => x.id === id);
+            if (!c) return;
+            document.getElementById("compEmployee").value = c.empId;
+            populateEmployeeInfo();
+            document.getElementById("compAmount").value = c.amount;
+            document.getElementById("compFrequency").value = c.frequency;
+            showAddCompensationModal();
+        } // [11]
+
+        function deleteCompensation(id) {
+            state.compensations = state.compensations.filter((x) => x.id !== id);
+            LS.set(NS.compensations, state.compensations);
+            renderAll();
+        } // [11]
+
+        function filterCompensations() {
+            renderCompensations();
+        } // [11]
+
+        // Locations (basic demo)
+        function editLocation(id) {
+            /* left as exercise */
+        } // [11]
+        function deleteLocation(id) {
+            state.locations = state.locations.filter((x) => x.id !== id);
+            LS.set(NS.locations, state.locations);
+            renderAll();
+        } // [11]
+
+        /* ---------------- Sync button & logout ---------------- */
+        function syncAllData() {
+            // In a real app, this would sync with server; here we just force re-render
+            renderAll();
+            console.log("Synced from localStorage");
+        } // [11]
+
+        function premiumLogout() {
+            // Keep data, but reset UI state
+            state.ui.lastLogin = new Date().toISOString();
+            LS.set(NS.ui, state.ui);
+            console.log("Logout clicked");
+        } // [11]
+
+        /* ---------------- Cross-tab live updates ---------------- */
+        LS.onChange((e) => {
+            if (!e.key || !e.newValue) return;
+            switch (e.key) {
+                case NS.employees:
+                    state.employees = JSON.parse(e.newValue);
+                    break;
+                case NS.departments:
+                    state.departments = JSON.parse(e.newValue);
+                    break;
+                case NS.compensations:
+                    state.compensations = JSON.parse(e.newValue);
+                    break;
+                case NS.locations:
+                    state.locations = JSON.parse(e.newValue);
+                    break;
+                case NS.ui:
+                    state.ui = JSON.parse(e.newValue);
+                    break;
+                default:
+                    return;
+            }
+            renderAll();
+        }); // [7][17]
+
+        /* ---------------- Initialize ---------------- */
+        document.addEventListener("DOMContentLoaded", () => {
+            boot();
+        });
+    </script>
